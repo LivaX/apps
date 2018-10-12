@@ -130,6 +130,7 @@ RUN set -ex \
 		$HTTPD_HOME/manual \
 	&& rm $DOCKER_BUILD_HOME/httpd.tar.gz \
 	&& apt-get purge -y -V -o APT::AutoRemove::RecommendsImportant=false --auto-remove $httpdBuildtimeDeps \
+	
 
 	# ----------
 	# 3. mariadb
@@ -234,6 +235,14 @@ RUN set -ex \
 	&& apt-get install -y --no-install-recommends openssh-server \
 	&& echo "$SSH_PASSWD" | chpasswd \
 
+	# ---------------
+	# 2. apache htpasswd
+	# ---------------
+	&& mkdir -p $HTTPD_HOME/passwd \
+	&& apt-get install apache2-utils -y \
+	&& htpasswd -b -c $HTTPD_HOME/passwd/.htpasswd vds vds2356 \
+	&& htpasswd -b $HTTPD_HOME/passwd/.htpasswd recette vds8956 \
+
 	# -----------
 	# ~. clean up
 	# -----------
@@ -249,6 +258,7 @@ RUN set -ex \
 COPY httpd.conf $HTTPD_CONF_DIR/
 COPY httpd-modules.conf $HTTPD_CONF_DIR/
 COPY httpd-php.conf $HTTPD_CONF_DIR/
+
 # php
 COPY php.ini $PHP_CONF_DIR/
 COPY php-opcache.ini $PHP_CONF_DIR_SCAN/
@@ -275,7 +285,9 @@ RUN set -ex \
 	##
 	&& ln -s $PHPMYADMIN_HOME /var/www/phpmyadmin \
 	##
-	&& ln -s $APP_HOME /var/www/wwwroot 
+	&& ln -s $APP_HOME /var/www/wwwroot
+
+
 
 # =====
 # final
